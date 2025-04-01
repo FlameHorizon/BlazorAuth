@@ -1,0 +1,87 @@
+@page "/login"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+
+@inject NavigationManager NavigationManager
+
+<div class="container">
+   <div class="row justify-content-md-center">
+      <div class="col col-lg-4 pt-4 border rounded align-self-center">
+         <EditForm
+            Model="@Model"
+            OnValidSubmit="Authenticate"
+            FormName="LoginForm">
+         
+            <DataAnnotationsValidator/>
+
+            <label class="mb-2">Enter personal GUID</label>
+            <InputText
+               @bind-Value="Model.Guid"
+               class="form-control"
+               placeholder="Guid"/>
+
+            <ValidationMessage For="() => Model.Guid"/>
+       
+            <div class="mb-3 text-center">
+               <span class="text-danger">@_errorMessage</span>
+            </div>
+         
+            <div class="mb-3 d-grid gap-4">
+               <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+         </EditForm>
+      </div>
+   </div>
+</div>
+
+@code {
+   [CascadingParameter] 
+   public HttpContext? HttpContext { get; set; }
+
+   [SupplyParameterFromForm] 
+   public LoginViewModel Model { get; set; } = new();
+
+   private string? _errorMessage;
+
+   private async Task Authenticate()
+   {
+      // TODO: Here, we will need a call to DB in order to see,
+      // if given user can is registered as well as if 
+      // user is active.
+      UserAccount? userAccount = GetUserAccount(Model.Guid);
+      if (userAccount is null)
+      {
+         _errorMessage = "Invalid GUID";
+         return;
+      }
+      
+      var claims = new List<Claim>
+      {
+         new(ClaimTypes.Name, Model.Guid),
+         new(ClaimTypes.Role, userAccount.Role)
+      };
+
+      var identity = new ClaimsIdentity(
+         claims,
+         CookieAuthenticationDefaults.AuthenticationScheme);
+      
+      var principal = new ClaimsPrincipal(identity);
+      await HttpContext.SignInAsync(principal);
+
+      NavigationManager.NavigateTo("/", forceLoad:true);
+   }
+
+   private UserAccount? GetUserAccount(string guid)
+   {
+      return new UserAccount()
+      {
+         Role = "User"
+      };
+   }
+
+   private class UserAccount
+   {
+      public string Role { get; set; }
+   }
+}

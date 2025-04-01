@@ -1,0 +1,16 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<AuthorizeView>
+    <NotAuthorized>
+        <span>You are not logged in. Please <a class="fw-bolder" href="/login">click here</a> to login.</span>
+    </NotAuthorized>
+    <Authorized>
+        <span>Logged in as <b>@context.User.Identity.Name</b>. <a class="fw-bolder" href="/logout">Click here</a> to logout.</span>
+    </Authorized>
+</AuthorizeView>
