@@ -2,7 +2,7 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
-
+@attribute [ExcludeFromInteractiveRouting]
 @inject NavigationManager NavigationManager
 
 <div class="container">
@@ -55,7 +55,7 @@
          _errorMessage = "Invalid GUID";
          return;
       }
-      
+
       var claims = new List<Claim>
       {
          new(ClaimTypes.Name, Model.Guid),
@@ -65,7 +65,7 @@
       var identity = new ClaimsIdentity(
          claims,
          CookieAuthenticationDefaults.AuthenticationScheme);
-      
+
       var principal = new ClaimsPrincipal(identity);
       await HttpContext.SignInAsync(principal);
 
